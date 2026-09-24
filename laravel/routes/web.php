@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ProductController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TestController;
 
@@ -19,4 +20,10 @@ Route::get('/', function () {
 });
 Route::get('/test', [TestController::class, 'test']);
 
-
+Route::controller(ProductController::class)->group(function () {
+    Route::get('/products', 'getProducts');
+    Route::get('/products/{id}', 'getProductItem');
+    Route::post('/products', 'createProduct');
+    Route::match(['put', 'patch'], '/products/{id}', 'updateProduct');
+    Route::delete('/products/{id}', 'deleteProduct');
+});
