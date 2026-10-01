@@ -20,10 +20,10 @@ Route::get('/', function () {
 });
 Route::get('/test', [TestController::class, 'test']);
 
-Route::controller(ProductController::class)->group(function () {
-    Route::get('/products', 'getProducts');
-    Route::get('/products/{id}', 'getProductItem');
-    Route::post('/products', 'createProduct');
-    Route::match(['put', 'patch'], '/products/{id}', 'updateProduct');
-    Route::delete('/products/{id}', 'deleteProduct');
-});
+//Route::controller(ProductController::class)->group(function () {
+//    Route::get('/products', 'getProducts');
+//    Route::get('/products/{id}', 'getProductItem');
+//    Route::post('/products', 'createProduct');
+//    Route::match(['put', 'patch'], '/products/{id}', 'updateProduct');
+//    Route::delete('/products/{id}', 'deleteProduct');
+//});

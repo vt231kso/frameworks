@@ -18,7 +18,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-use App\Http\Controllers\ProductController;
+//use App\Http\Controllers\ProductController;
 
 
 //Route::get('/products', [ProductController::class, 'getProducts']);
@@ -27,3 +27,15 @@ use App\Http\Controllers\ProductController;
 //Route::match(['put', 'patch'], '/products/{id}', [ProductController::class, 'updateProduct']);
 //Route::delete('/products/{id}', [ProductController::class, 'deleteProduct']);
 //
+
+use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\ProductController;
+use App\Http\Controllers\Api\ClientController;
+use App\Http\Controllers\Api\CourierController;
+use App\Http\Controllers\Api\OrderController;
+
+Route::apiResource('categories', CategoryController::class);
+Route::apiResource('products', ProductController::class);
+Route::apiResource('clients', ClientController::class);
+Route::apiResource('couriers', CourierController::class);
+Route::apiResource('orders', OrderController::class);
