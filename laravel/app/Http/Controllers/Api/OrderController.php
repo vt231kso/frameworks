@@ -5,73 +5,123 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 class OrderController extends Controller
 {
-    public function index()
+    /**
+     * @return JsonResponse
+     */
+    public function index(): JsonResponse
     {
-        return response()->json(Order::all(), 200);
+        $orders = Order::all();
+
+        return response()->json($orders, Response::HTTP_OK);
     }
 
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'client_id' => 'required|exists:clients,id',
-            'courier_id' => 'nullable|exists:couriers,id',
-            'product_id' => 'required|exists:products,id',
-            'delivery_address' => 'required|string|max:255',
-            'total_amount' => 'required|numeric|min:0',
-            'status' => 'nullable|string|max:50',
-        ]);
-
-        $order = Order::create($validated);
-
-        return response()->json($order, 201);
-    }
-
-    public function show($id)
+    /**
+     * @param string $id
+     * @return JsonResponse
+     */
+    public function show(string $id): JsonResponse
     {
         $order = Order::find($id);
 
-        if (!$order) {
-            return response()->json(['message' => 'Order not found'], 404);
+        if (empty($order)) {
+            return response()->json(
+                ['message' => 'Order not found'],
+                Response::HTTP_NOT_FOUND
+            );
         }
 
-        return response()->json($order, 200);
+        return response()->json($order, Response::HTTP_OK);
     }
 
-    public function update(Request $request, $id)
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function store(Request $request): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+
+        $order = DB::transaction(function () use ($data) {
+            $order = new Order();
+            $order->fill($data);
+            $order->save();
+
+            return $order;
+        });
+
+        return new JsonResponse($order, Response::HTTP_CREATED);
+    }
+
+    /**
+     * @param Request $request
+     * @param string $id
+     * @return JsonResponse
+     */
+    public function update(Request $request, string $id): JsonResponse
     {
         $order = Order::find($id);
 
-        if (!$order) {
-            return response()->json(['message' => 'Order not found'], 404);
+        if (empty($order)) {
+            return response()->json(
+                ['message' => 'Order not found'],
+                Response::HTTP_NOT_FOUND
+            );
         }
 
-        $validated = $request->validate([
-            'client_id' => 'sometimes|required|exists:clients,id',
-            'courier_id' => 'nullable|exists:couriers,id',
-            'product_id' => 'sometimes|required|exists:products,id',
-            'delivery_address' => 'sometimes|required|string|max:255',
-            'total_amount' => 'sometimes|required|numeric|min:0',
-            'status' => 'nullable|string|max:50',
-        ]);
+        $data = json_decode($request->getContent(), true);
 
-        $order->update($validated);
+        if (isset($data['client_id'])) {
+            $order->client_id = $data['client_id'];
+        }
 
-        return response()->json($order, 200);
+        if (array_key_exists('courier_id', $data)) {
+            $order->courier_id = $data['courier_id'];
+        }
+
+        if (isset($data['product_id'])) {
+            $order->product_id = $data['product_id'];
+        }
+
+        if (isset($data['delivery_address'])) {
+            $order->delivery_address = $data['delivery_address'];
+        }
+
+        if (isset($data['total_amount'])) {
+            $order->total_amount = $data['total_amount'];
+        }
+
+        if (isset($data['status'])) {
+            $order->status = $data['status'];
+        }
+
+        $order->save();
+
+        return new JsonResponse($order, Response::HTTP_OK);
     }
 
-    public function destroy($id)
+    /**
+     * @param string $id
+     * @return JsonResponse
+     */
+    public function destroy(string $id): JsonResponse
     {
         $order = Order::find($id);
 
-        if (!$order) {
-            return response()->json(['message' => 'Order not found'], 404);
+        if (empty($order)) {
+            return response()->json(
+                ['message' => 'Order not found'],
+                Response::HTTP_NOT_FOUND
+            );
         }
 
         $order->delete();
 
-        return response()->json(['message' => 'Order deleted successfully'], 200);
+        return new JsonResponse(['message' => 'Order deleted successfully'], Response::HTTP_OK);
     }
 }

@@ -2,12 +2,12 @@
 
 namespace App\Entity;
 
-
 use Doctrine\ORM\Mapping as ORM;
+use JsonSerializable;
 
 #[ORM\Entity]
 #[ORM\Table(name: '`order`')]
-class Order
+class Order implements JsonSerializable
 {
   #[ORM\Id]
   #[ORM\GeneratedValue]
@@ -36,16 +36,35 @@ class Order
   private ?Product $product = null;
 
   public function getId(): ?int { return $this->id; }
+
   public function getDeliveryAddress(): ?string { return $this->deliveryAddress; }
-  public function setDeliveryAddress(string $deliveryAddress): self { $this->deliveryAddress = $deliveryAddress; return $this; }
+  public function setDeliveryAddress(string $deliveryAddress): static {$this->deliveryAddress = $deliveryAddress; return$this; }
+
   public function getTotalAmount(): ?string { return $this->totalAmount; }
-  public function setTotalAmount(string $totalAmount): self { $this->totalAmount = $totalAmount; return $this; }
+  public function setTotalAmount(string $totalAmount): static {$this->totalAmount = $totalAmount; return$this; }
+
   public function getStatus(): ?string { return $this->status; }
-  public function setStatus(?string $status): self { $this->status = $status; return $this; }
+  public function setStatus(?string $status): static {$this->status = $status; return$this; }
+
   public function getClient(): ?Client { return $this->client; }
-  public function setClient(?Client $client): self { $this->client = $client; return $this; }
+  public function setClient(?Client $client): static {$this->client = $client; return$this; }
+
   public function getCourier(): ?Courier { return $this->courier; }
-  public function setCourier(?Courier $courier): self { $this->courier = $courier; return $this; }
+  public function setCourier(?Courier $courier): static {$this->courier = $courier; return$this; }
+
   public function getProduct(): ?Product { return $this->product; }
-  public function setProduct(?Product $product): self { $this->product = $product; return $this; }
+  public function setProduct(?Product $product): static {$this->product = $product; return$this; }
+
+  public function jsonSerialize(): mixed
+  {
+    return [
+      'id'               => $this->id,
+      'delivery_address' => $this->deliveryAddress,
+      'total_amount'     => $this->totalAmount,
+      'status'           => $this->status,
+      'client'           => $this->client,
+      'courier'          => $this->courier,
+      'product'          => $this->product,
+    ];
+  }
 }

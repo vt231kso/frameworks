@@ -5,67 +5,111 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Client;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 class ClientController extends Controller
 {
-    public function index()
+    /**
+     * @return JsonResponse
+     */
+    public function index(): JsonResponse
     {
-        return response()->json(Client::all(), 200);
+        $clients = Client::all();
+
+        return response()->json($clients, Response::HTTP_OK);
     }
 
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'phone' => 'required|string|max:50',
-            'email' => 'required|email|unique:clients,email',
-        ]);
-
-        $client = Client::create($validated);
-
-        return response()->json($client, 201);
-    }
-
-    public function show($id)
+    /**
+     * @param string $id
+     * @return JsonResponse
+     */
+    public function show(string $id): JsonResponse
     {
         $client = Client::find($id);
 
-        if (!$client) {
-            return response()->json(['message' => 'Client not found'], 404);
+        if (empty($client)) {
+            return response()->json(
+                ['message' => 'Client not found'],
+                Response::HTTP_NOT_FOUND
+            );
         }
 
-        return response()->json($client, 200);
+        return response()->json($client, Response::HTTP_OK);
     }
 
-    public function update(Request $request, $id)
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function store(Request $request): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+
+        $client = DB::transaction(function () use ($data) {
+            $client = new Client();
+            $client->fill($data);
+            $client->save();
+
+            return $client;
+        });
+
+        return new JsonResponse($client, Response::HTTP_CREATED);
+    }
+
+    /**
+     * @param Request $request
+     * @param string $id
+     * @return JsonResponse
+     */
+    public function update(Request $request, string $id): JsonResponse
     {
         $client = Client::find($id);
 
-        if (!$client) {
-            return response()->json(['message' => 'Client not found'], 404);
+        if (empty($client)) {
+            return response()->json(
+                ['message' => 'Client not found'],
+                Response::HTTP_NOT_FOUND
+            );
         }
 
-        $validated = $request->validate([
-            'name' => 'sometimes|required|string|max:255',
-            'phone' => 'sometimes|required|string|max:50',
-            'email' => 'sometimes|required|email|unique:clients,email,' . $id,
-        ]);
+        $data = json_decode($request->getContent(), true);
 
-        $client->update($validated);
+        if (isset($data['name'])) {
+            $client->name = $data['name'];
+        }
 
-        return response()->json($client, 200);
+        if (isset($data['phone'])) {
+            $client->phone = $data['phone'];
+        }
+
+        if (isset($data['email'])) {
+            $client->email = $data['email'];
+        }
+
+        $client->save();
+
+        return new JsonResponse($client, Response::HTTP_OK);
     }
 
-    public function destroy($id)
+    /**
+     * @param string $id
+     * @return JsonResponse
+     */
+    public function destroy(string $id): JsonResponse
     {
         $client = Client::find($id);
 
-        if (!$client) {
-            return response()->json(['message' => 'Client not found'], 404);
+        if (empty($client)) {
+            return response()->json(
+                ['message' => 'Client not found'],
+                Response::HTTP_NOT_FOUND
+            );
         }
 
         $client->delete();
 
-        return response()->json(['message' => 'Client deleted successfully'], 200);
+        return new JsonResponse(['message' => 'Client deleted successfully'], Response::HTTP_OK);
     }
 }

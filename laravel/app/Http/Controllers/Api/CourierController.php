@@ -5,67 +5,111 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Courier;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 class CourierController extends Controller
 {
-    public function index()
+    /**
+     * @return JsonResponse
+     */
+    public function index(): JsonResponse
     {
-        return response()->json(Courier::all(), 200);
+        $couriers = Courier::all();
+
+        return response()->json($couriers, Response::HTTP_OK);
     }
 
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'phone' => 'required|string|max:50',
-            'vehicle_type' => 'nullable|string|max:50',
-        ]);
-
-        $courier = Courier::create($validated);
-
-        return response()->json($courier, 201);
-    }
-
-    public function show($id)
+    /**
+     * @param string $id
+     * @return JsonResponse
+     */
+    public function show(string $id): JsonResponse
     {
         $courier = Courier::find($id);
 
-        if (!$courier) {
-            return response()->json(['message' => 'Courier not found'], 404);
+        if (empty($courier)) {
+            return response()->json(
+                ['message' => 'Courier not found'],
+                Response::HTTP_NOT_FOUND
+            );
         }
 
-        return response()->json($courier, 200);
+        return response()->json($courier, Response::HTTP_OK);
     }
 
-    public function update(Request $request, $id)
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function store(Request $request): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+
+        $courier = DB::transaction(function () use ($data) {
+            $courier = new Courier();
+            $courier->fill($data);
+            $courier->save();
+
+            return $courier;
+        });
+
+        return new JsonResponse($courier, Response::HTTP_CREATED);
+    }
+
+    /**
+     * @param Request $request
+     * @param string $id
+     * @return JsonResponse
+     */
+    public function update(Request $request, string $id): JsonResponse
     {
         $courier = Courier::find($id);
 
-        if (!$courier) {
-            return response()->json(['message' => 'Courier not found'], 404);
+        if (empty($courier)) {
+            return response()->json(
+                ['message' => 'Courier not found'],
+                Response::HTTP_NOT_FOUND
+            );
         }
 
-        $validated = $request->validate([
-            'name' => 'sometimes|required|string|max:255',
-            'phone' => 'sometimes|required|string|max:50',
-            'vehicle_type' => 'nullable|string|max:50',
-        ]);
+        $data = json_decode($request->getContent(), true);
 
-        $courier->update($validated);
+        if (isset($data['name'])) {
+            $courier->name = $data['name'];
+        }
 
-        return response()->json($courier, 200);
+        if (isset($data['phone'])) {
+            $courier->phone = $data['phone'];
+        }
+
+        if (array_key_exists('vehicle_type', $data)) {
+            $courier->vehicle_type = $data['vehicle_type'];
+        }
+
+        $courier->save();
+
+        return new JsonResponse($courier, Response::HTTP_OK);
     }
 
-    public function destroy($id)
+    /**
+     * @param string $id
+     * @return JsonResponse
+     */
+    public function destroy(string $id): JsonResponse
     {
         $courier = Courier::find($id);
 
-        if (!$courier) {
-            return response()->json(['message' => 'Courier not found'], 404);
+        if (empty($courier)) {
+            return response()->json(
+                ['message' => 'Courier not found'],
+                Response::HTTP_NOT_FOUND
+            );
         }
 
         $courier->delete();
 
-        return response()->json(['message' => 'Courier deleted successfully'], 200);
+        return new JsonResponse(['message' => 'Courier deleted successfully'], Response::HTTP_OK);
     }
 }

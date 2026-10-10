@@ -5,70 +5,107 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 class CategoryController extends Controller
 {
-    // Отримати всі категорії (READ)
-    public function index()
+    /**
+     * @return JsonResponse
+     */
+    public function index(): JsonResponse
     {
-        return response()->json(Category::all(), 200);
+        $categories = Category::all();
+
+        return response()->json($categories, Response::HTTP_OK);
     }
 
-    // Створити нову категорію (CREATE)
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-        ]);
-
-        $category = Category::create($validated);
-
-        return response()->json($category, 201);
-    }
-
-    // Отримати одну категорію по ID (READ)
-    public function show($id)
+    /**
+     * @param string $id
+     * @return JsonResponse
+     */
+    public function show(string $id): JsonResponse
     {
         $category = Category::find($id);
 
-        if (!$category) {
-            return response()->json(['message' => 'Category not found'], 404);
+        if (empty($category)) {
+            return response()->json(
+                ['message' => 'Category not found'],
+                Response::HTTP_NOT_FOUND
+            );
         }
 
-        return response()->json($category, 200);
+        return response()->json($category, Response::HTTP_OK);
     }
 
-    // Оновити категорію (UPDATE)
-    public function update(Request $request, $id)
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function store(Request $request): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+
+        $category = DB::transaction(function () use ($data) {
+            $category = new Category();
+            $category->fill($data);
+            $category->save();
+
+            return $category;
+        });
+
+        return new JsonResponse($category, Response::HTTP_CREATED);
+    }
+
+    /**
+     * @param Request $request
+     * @param string $id
+     * @return JsonResponse
+     */
+    public function update(Request $request, string $id): JsonResponse
     {
         $category = Category::find($id);
 
-        if (!$category) {
-            return response()->json(['message' => 'Category not found'], 404);
+        if (empty($category)) {
+            return response()->json(
+                ['message' => 'Category not found'],
+                Response::HTTP_NOT_FOUND
+            );
         }
 
-        $validated = $request->validate([
-            'name' => 'sometimes|required|string|max:255',
-            'description' => 'nullable|string',
-        ]);
+        $data = json_decode($request->getContent(), true);
 
-        $category->update($validated);
+        if (isset($data['name'])) {
+            $category->name = $data['name'];
+        }
 
-        return response()->json($category, 200);
+        if (array_key_exists('description', $data)) {
+            $category->description = $data['description'];
+        }
+
+        $category->save();
+
+        return new JsonResponse($category, Response::HTTP_OK);
     }
 
-    // Видалити категорію (DELETE)
-    public function destroy($id)
+    /**
+     * @param string $id
+     * @return JsonResponse
+     */
+    public function destroy(string $id): JsonResponse
     {
         $category = Category::find($id);
 
-        if (!$category) {
-            return response()->json(['message' => 'Category not found'], 404);
+        if (empty($category)) {
+            return response()->json(
+                ['message' => 'Category not found'],
+                Response::HTTP_NOT_FOUND
+            );
         }
 
         $category->delete();
 
-        return response()->json(['message' => 'Category deleted successfully'], 200);
+        return new JsonResponse(['message' => 'Category deleted successfully'], Response::HTTP_OK);
     }
 }
