@@ -12,6 +12,9 @@ use Symfony\Component\Routing\Attribute\Route;
 
 final class CategoryController extends AbstractController
 {
+  /**
+   * @var EntityManagerInterface
+   */
   private EntityManagerInterface $entityManager;
 
   public function __construct(EntityManagerInterface $entityManager)
@@ -19,6 +22,10 @@ final class CategoryController extends AbstractController
     $this->entityManager = $entityManager;
   }
 
+  /**
+   * Отримати категорію
+   * @return JsonResponse
+   */
   #[Route('/api/categories', name: 'app_get_categories', methods: ['GET'])]
   public function getCategories(): JsonResponse
   {
@@ -26,6 +33,11 @@ final class CategoryController extends AbstractController
     return $this->json($categories, Response::HTTP_OK);
   }
 
+  /**
+   * Отримати  id
+   * @param string $id
+   * @return JsonResponse
+   */
   #[Route('/api/categories/{id}', name: 'app_get_category_by_id', methods: ['GET'])]
   public function getCategoryById(string $id): JsonResponse
   {
@@ -39,6 +51,11 @@ final class CategoryController extends AbstractController
     return $this->json($category, Response::HTTP_OK);
   }
 
+  /**
+   * Створити категорію
+   * @param Request $request
+   * @return JsonResponse
+   */
   #[Route('/api/categories', name: 'app_create_category', methods: ['POST'])]
   public function createCategory(Request $request): JsonResponse
   {
@@ -58,6 +75,12 @@ final class CategoryController extends AbstractController
     return $this->json($category, Response::HTTP_CREATED);
   }
 
+  /**
+   * Змінити категорію
+   * @param string $id
+   * @param Request $request
+   * @return JsonResponse
+   */
   #[Route('/api/categories/{id}', name: 'app_update_category', methods: ['PATCH', 'PUT'])]
   public function updateCategory(string $id, Request $request): JsonResponse
   {
@@ -82,6 +105,11 @@ final class CategoryController extends AbstractController
     return $this->json($category, Response::HTTP_OK);
   }
 
+  /**
+   * Видалити категорію
+   * @param string $id
+   * @return JsonResponse
+   */
   #[Route('/api/categories/{id}', name: 'app_delete_category', methods: ['DELETE'])]
   public function deleteCategory(string $id): JsonResponse
   {

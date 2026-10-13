@@ -9,8 +9,16 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Category extends Model
 {
     use HasFactory;
+
+    /**
+     * Масив fillable
+     * @var string[]
+     */
     protected $fillable = ['name', 'description'];
 
+    /**
+     * @return HasMany
+     */
     public function products(): HasMany
     {
         return $this->hasMany(Product::class);

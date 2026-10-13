@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\Response;
 class CategoryController extends Controller
 {
     /**
+     * Отримати категорії
      * @return JsonResponse
      */
     public function index(): JsonResponse
@@ -22,6 +23,7 @@ class CategoryController extends Controller
     }
 
     /**
+     * Отримати за id
      * @param string $id
      * @return JsonResponse
      */
@@ -40,6 +42,7 @@ class CategoryController extends Controller
     }
 
     /**
+     * Створити категорію
      * @param Request $request
      * @return JsonResponse
      */
@@ -59,6 +62,7 @@ class CategoryController extends Controller
     }
 
     /**
+     * Змінити категорію
      * @param Request $request
      * @param string $id
      * @return JsonResponse
@@ -90,6 +94,7 @@ class CategoryController extends Controller
     }
 
     /**
+     * Видалити категорію
      * @param string $id
      * @return JsonResponse
      */
@@ -106,6 +111,6 @@ class CategoryController extends Controller
 
         $category->delete();
 
-        return new JsonResponse(['message' => 'Category deleted successfully'], Response::HTTP_OK);
+        return new JsonResponse(['message' => 'Category deleted successfully'], Response::HTTP_NOT_FOUND);
     }
 }

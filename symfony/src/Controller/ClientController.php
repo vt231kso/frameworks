@@ -12,6 +12,9 @@ use Symfony\Component\Routing\Attribute\Route;
 
 final class ClientController extends AbstractController
 {
+  /**
+   * @var EntityManagerInterface
+   */
   private EntityManagerInterface $entityManager;
 
   public function __construct(EntityManagerInterface $entityManager)
@@ -19,6 +22,10 @@ final class ClientController extends AbstractController
     $this->entityManager = $entityManager;
   }
 
+  /**
+   * Отримати клієнтів
+   * @return JsonResponse
+   */
   #[Route('/api/clients', name: 'app_get_clients', methods: ['GET'])]
   public function getClients(): JsonResponse
   {
@@ -26,6 +33,11 @@ final class ClientController extends AbstractController
     return $this->json($clients, Response::HTTP_OK);
   }
 
+  /**
+   * Отримати за id
+   * @param string $id
+   * @return JsonResponse
+   */
   #[Route('/api/clients/{id}', name: 'app_get_client_by_id', methods: ['GET'])]
   public function getClientById(string $id): JsonResponse
   {
@@ -39,6 +51,11 @@ final class ClientController extends AbstractController
     return $this->json($client, Response::HTTP_OK);
   }
 
+  /**
+   * Створити клієнта
+   * @param Request $request
+   * @return JsonResponse
+   */
   #[Route('/api/clients', name: 'app_create_client', methods: ['POST'])]
   public function createClient(Request $request): JsonResponse
   {
@@ -56,6 +73,12 @@ final class ClientController extends AbstractController
     return $this->json($client, Response::HTTP_CREATED);
   }
 
+  /**
+   * Змінити клієнта
+   * @param string $id
+   * @param Request $request
+   * @return JsonResponse
+   */
   #[Route('/api/clients/{id}', name: 'app_update_client', methods: ['PATCH', 'PUT'])]
   public function updateClient(string $id, Request $request): JsonResponse
   {
@@ -83,6 +106,11 @@ final class ClientController extends AbstractController
     return $this->json($client, Response::HTTP_OK);
   }
 
+  /**
+   * Видалити клієнта
+   * @param string $id
+   * @return JsonResponse
+   */
   #[Route('/api/clients/{id}', name: 'app_delete_client', methods: ['DELETE'])]
   public function deleteClient(string $id): JsonResponse
   {

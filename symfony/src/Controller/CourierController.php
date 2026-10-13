@@ -12,6 +12,9 @@ use Symfony\Component\Routing\Attribute\Route;
 
 final class CourierController extends AbstractController
 {
+  /**
+   * @var EntityManagerInterface
+   */
   private EntityManagerInterface $entityManager;
 
   public function __construct(EntityManagerInterface $entityManager)
@@ -19,6 +22,10 @@ final class CourierController extends AbstractController
     $this->entityManager = $entityManager;
   }
 
+  /**
+   * Отримати курєра
+   * @return JsonResponse
+   */
   #[Route('/api/couriers', name: 'app_get_couriers', methods: ['GET'])]
   public function getCouriers(): JsonResponse
   {
@@ -26,6 +33,11 @@ final class CourierController extends AbstractController
     return $this->json($couriers, Response::HTTP_OK);
   }
 
+  /**
+   * Отримати за id
+   * @param string $id
+   * @return JsonResponse
+   */
   #[Route('/api/couriers/{id}', name: 'app_get_courier_by_id', methods: ['GET'])]
   public function getCourierById(string $id): JsonResponse
   {
@@ -39,6 +51,11 @@ final class CourierController extends AbstractController
     return $this->json($courier, Response::HTTP_OK);
   }
 
+  /**
+   * Створити курєра
+   * @param Request $request
+   * @return JsonResponse
+   */
   #[Route('/api/couriers', name: 'app_create_courier', methods: ['POST'])]
   public function createCourier(Request $request): JsonResponse
   {
@@ -56,6 +73,12 @@ final class CourierController extends AbstractController
     return $this->json($courier, Response::HTTP_CREATED);
   }
 
+  /**
+   * Змінити курєра
+   * @param string $id
+   * @param Request $request
+   * @return JsonResponse
+   */
   #[Route('/api/couriers/{id}', name: 'app_update_courier', methods: ['PATCH', 'PUT'])]
   public function updateCourier(string $id, Request $request): JsonResponse
   {
@@ -83,6 +106,11 @@ final class CourierController extends AbstractController
     return $this->json($courier, Response::HTTP_OK);
   }
 
+  /**
+   * Видалити курєра
+   * @param string $id
+   * @return JsonResponse
+   */
   #[Route('/api/couriers/{id}', name: 'app_delete_courier', methods: ['DELETE'])]
   public function deleteCourier(string $id): JsonResponse
   {

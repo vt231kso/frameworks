@@ -13,6 +13,9 @@ use Symfony\Component\Routing\Attribute\Route;
 
 final class ProductController extends AbstractController
 {
+  /**
+   * @var EntityManagerInterface
+   */
   private EntityManagerInterface $entityManager;
 
   public function __construct(EntityManagerInterface $entityManager)
@@ -20,6 +23,10 @@ final class ProductController extends AbstractController
     $this->entityManager = $entityManager;
   }
 
+  /**
+   * Отримати продукти
+   * @return JsonResponse
+   */
   #[Route('/api/products', name: 'app_get_products', methods: ['GET'])]
   public function getProducts(): JsonResponse
   {
@@ -27,6 +34,11 @@ final class ProductController extends AbstractController
     return $this->json($products, Response::HTTP_OK);
   }
 
+  /**
+   * Отримати за id
+   * @param string $id
+   * @return JsonResponse
+   */
   #[Route('/api/products/{id}', name: 'app_get_product_by_id', methods: ['GET'])]
   public function getProductById(string $id): JsonResponse
   {
@@ -40,6 +52,11 @@ final class ProductController extends AbstractController
     return $this->json($product, Response::HTTP_OK);
   }
 
+  /**
+   * Створити продукт
+   * @param Request $request
+   * @return JsonResponse
+   */
   #[Route('/api/products', name: 'app_create_product', methods: ['POST'])]
   public function createProduct(Request $request): JsonResponse
   {
@@ -63,6 +80,12 @@ final class ProductController extends AbstractController
     return $this->json($product, Response::HTTP_CREATED);
   }
 
+  /**
+   * Змінити продукт
+   * @param string $id
+   * @param Request $request
+   * @return JsonResponse
+   */
   #[Route('/api/products/{id}', name: 'app_update_product', methods: ['PATCH', 'PUT'])]
   public function updateProduct(string $id, Request $request): JsonResponse
   {
@@ -93,6 +116,11 @@ final class ProductController extends AbstractController
     return $this->json($product, Response::HTTP_OK);
   }
 
+  /**
+   *Видалити продукт
+   * @param string $id
+   * @return JsonResponse
+   */
   #[Route('/api/products/{id}', name: 'app_delete_product', methods: ['DELETE'])]
   public function deleteProduct(string $id): JsonResponse
   {

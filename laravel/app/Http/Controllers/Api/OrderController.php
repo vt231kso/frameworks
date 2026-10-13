@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\Response;
 class OrderController extends Controller
 {
     /**
+     * Отримати замовлення
      * @return JsonResponse
      */
     public function index(): JsonResponse
@@ -22,6 +23,7 @@ class OrderController extends Controller
     }
 
     /**
+     * Отримати за id
      * @param string $id
      * @return JsonResponse
      */
@@ -40,6 +42,7 @@ class OrderController extends Controller
     }
 
     /**
+     * Створити замовлення
      * @param Request $request
      * @return JsonResponse
      */
@@ -59,6 +62,7 @@ class OrderController extends Controller
     }
 
     /**
+     * Змінити замовлення
      * @param Request $request
      * @param string $id
      * @return JsonResponse
@@ -106,6 +110,7 @@ class OrderController extends Controller
     }
 
     /**
+     * Видалити замовлення
      * @param string $id
      * @return JsonResponse
      */
@@ -122,6 +127,6 @@ class OrderController extends Controller
 
         $order->delete();
 
-        return new JsonResponse(['message' => 'Order deleted successfully'], Response::HTTP_OK);
+        return new JsonResponse(['message' => 'Order deleted successfully'], Response::HTTP_NOT_FOUND);
     }
 }

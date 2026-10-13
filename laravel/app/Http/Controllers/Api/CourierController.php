@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\Response;
 class CourierController extends Controller
 {
     /**
+     * Отримати куєрів
      * @return JsonResponse
      */
     public function index(): JsonResponse
@@ -22,6 +23,7 @@ class CourierController extends Controller
     }
 
     /**
+     * Отримати за id
      * @param string $id
      * @return JsonResponse
      */
@@ -40,6 +42,7 @@ class CourierController extends Controller
     }
 
     /**
+     * Створити куєра
      * @param Request $request
      * @return JsonResponse
      */
@@ -59,6 +62,7 @@ class CourierController extends Controller
     }
 
     /**
+     * Змінити курєра
      * @param Request $request
      * @param string $id
      * @return JsonResponse
@@ -94,6 +98,7 @@ class CourierController extends Controller
     }
 
     /**
+     * Видалити куєра
      * @param string $id
      * @return JsonResponse
      */
@@ -110,6 +115,6 @@ class CourierController extends Controller
 
         $courier->delete();
 
-        return new JsonResponse(['message' => 'Courier deleted successfully'], Response::HTTP_OK);
+        return new JsonResponse(['message' => 'Courier deleted successfully'], Response::HTTP_NOT_FOUND);
     }
 }

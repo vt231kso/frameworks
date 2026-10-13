@@ -15,6 +15,9 @@ use Symfony\Component\Routing\Attribute\Route;
 
 final class OrderController extends AbstractController
 {
+  /**
+   * @var EntityManagerInterface
+   */
   private EntityManagerInterface $entityManager;
 
   public function __construct(EntityManagerInterface $entityManager)
@@ -22,6 +25,10 @@ final class OrderController extends AbstractController
     $this->entityManager = $entityManager;
   }
 
+  /**
+   * Отримати замовлення
+   * @return JsonResponse
+   */
   #[Route('/api/orders', name: 'app_get_orders', methods: ['GET'])]
   public function getOrders(): JsonResponse
   {
@@ -29,6 +36,11 @@ final class OrderController extends AbstractController
     return $this->json($orders, Response::HTTP_OK);
   }
 
+  /**
+   * Отримати за id
+   * @param string $id
+   * @return JsonResponse
+   */
   #[Route('/api/orders/{id}', name: 'app_get_order_by_id', methods: ['GET'])]
   public function getOrderById(string $id): JsonResponse
   {
@@ -42,6 +54,11 @@ final class OrderController extends AbstractController
     return $this->json($order, Response::HTTP_OK);
   }
 
+  /**
+   * Створити замовлення
+   * @param Request $request
+   * @return JsonResponse
+   */
   #[Route('/api/orders', name: 'app_create_order', methods: ['POST'])]
   public function createOrder(Request $request): JsonResponse
   {
@@ -72,6 +89,12 @@ final class OrderController extends AbstractController
     return $this->json($order, Response::HTTP_CREATED);
   }
 
+  /**
+   * Змінити замовлення
+   * @param string $id
+   * @param Request $request
+   * @return JsonResponse
+   */
   #[Route('/api/orders/{id}', name: 'app_update_order', methods: ['PATCH', 'PUT'])]
   public function updateOrder(string $id, Request $request): JsonResponse
   {
@@ -115,6 +138,11 @@ final class OrderController extends AbstractController
     return $this->json($order, Response::HTTP_OK);
   }
 
+  /**
+   * Видалити замовлення
+   * @param string $id
+   * @return JsonResponse
+   */
   #[Route('/api/orders/{id}', name: 'app_delete_order', methods: ['DELETE'])]
   public function deleteOrder(string $id): JsonResponse
   {

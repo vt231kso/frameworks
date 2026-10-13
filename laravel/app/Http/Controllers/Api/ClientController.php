@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\Response;
 class ClientController extends Controller
 {
     /**
+     * Отримати клінєтів
      * @return JsonResponse
      */
     public function index(): JsonResponse
@@ -22,6 +23,7 @@ class ClientController extends Controller
     }
 
     /**
+     * Отримати за id
      * @param string $id
      * @return JsonResponse
      */
@@ -40,6 +42,7 @@ class ClientController extends Controller
     }
 
     /**
+     * Створити клієнта
      * @param Request $request
      * @return JsonResponse
      */
@@ -59,6 +62,7 @@ class ClientController extends Controller
     }
 
     /**
+     * Змінити клієнта
      * @param Request $request
      * @param string $id
      * @return JsonResponse
@@ -94,6 +98,7 @@ class ClientController extends Controller
     }
 
     /**
+     * Видалити клієнта
      * @param string $id
      * @return JsonResponse
      */
@@ -110,6 +115,6 @@ class ClientController extends Controller
 
         $client->delete();
 
-        return new JsonResponse(['message' => 'Client deleted successfully'], Response::HTTP_OK);
+        return new JsonResponse(['message' => 'Client deleted successfully'], Response::HTTP_NOT_FOUND);
     }
 }
