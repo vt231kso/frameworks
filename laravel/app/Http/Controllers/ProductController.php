@@ -8,16 +8,30 @@ use Symfony\Component\HttpFoundation\Response;
 
 class ProductController extends Controller
 {
+    /**
+     * Масив товарів
+     * @var array|array[]
+     */
     private array $products = [
         1 => ['id' => 1, 'title' => 'Ноутбук', 'price' => 25000],
         2 => ['id' => 2, 'title' => 'Мишка', 'price' => 500],
     ];
+
+    /**
+     * Отримати список усіх товарів з масиву.
+     * @return JsonResponse
+     */
 
     public function getProducts(): JsonResponse
     {
         return response()->json(array_values($this->products), Response::HTTP_OK);
     }
 
+    /**
+     *Отримати один товар за його ID.
+     * @param int $id
+     * @return JsonResponse
+     */
     public function getProductItem(int $id): JsonResponse
     {
         if (!isset($this->products[$id])) {
@@ -27,6 +41,11 @@ class ProductController extends Controller
         return response()->json($this->products[$id], Response::HTTP_OK);
     }
 
+    /**
+     * Створити новий товар та додати його в масив
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function createProduct(Request $request): JsonResponse
     {
 
@@ -50,7 +69,12 @@ class ProductController extends Controller
         ], Response::HTTP_CREATED);
     }
 
-
+    /**
+     * Оновити дані наявного товару за ID
+     * @param int $id
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function updateProduct(int $id, Request $request): JsonResponse
     {
         if (!isset($this->products[$id])) {
@@ -72,6 +96,11 @@ class ProductController extends Controller
         ], Response::HTTP_OK);
     }
 
+    /**
+     * Видалити товар з масиву за ID
+     * @param int $id
+     * @return JsonResponse
+     */
     public function deleteProduct(int $id): JsonResponse
     {
         if (!isset($this->products[$id])) {
@@ -83,6 +112,6 @@ class ProductController extends Controller
         return response()->json([
             'message' => "Товар з ID $id видалено з масиву",
             'remaining_products' => array_values($this->products)
-        ], Response::HTTP_OK);
+        ], Response::HTTP_NOT_FOUND);
     }
 }
