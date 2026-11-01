@@ -12,14 +12,18 @@ use Symfony\Component\HttpFoundation\Response;
 class CourierController extends Controller
 {
     /**
-     * Отримати куєрів
+     * @param Request $request
      * @return JsonResponse
      */
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        $couriers = Courier::all();
+        $allowedFields = ['id', 'name', 'phone', 'vehicle_type'];
 
-        return response()->json($couriers, Response::HTTP_OK);
+        try {
+            return $this->filterAndPaginate(Courier::query(), $request, $allowedFields);
+        } catch (\InvalidArgumentException $e) {
+            return response()->json(['message' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
+        }
     }
 
     /**

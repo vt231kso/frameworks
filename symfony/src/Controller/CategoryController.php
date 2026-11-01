@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Category;
+use App\Repository\CategoryRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -16,23 +17,38 @@ final class CategoryController extends AbstractController
    * @var EntityManagerInterface
    */
   private EntityManagerInterface $entityManager;
+  /**
+   * @var CategoryRepository
+   */
+  private CategoryRepository $categoryRepository;
 
-  public function __construct(EntityManagerInterface $entityManager)
+  public function __construct(EntityManagerInterface $entityManager, CategoryRepository $categoryRepository)
   {
     $this->entityManager = $entityManager;
+    $this->categoryRepository = $categoryRepository;
   }
 
   /**
-   * Отримати категорію
+   * @param Request $request
    * @return JsonResponse
    */
   #[Route('/api/categories', name: 'app_get_categories', methods: ['GET'])]
-  public function getCategories(): JsonResponse
+  public function getCategories(Request $request): JsonResponse
   {
-    $categories = $this->entityManager->getRepository(Category::class)->findAll();
+    $allowedParams = ['name', 'description'];
+
+    try {
+      $categories = $this->categoryRepository->filterAndPaginate($request, $allowedParams);
+    } catch (\InvalidArgumentException $e) {
+      return $this->json(['message' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
+    }
+
+    if (empty($categories)) {
+      return $this->json(['message' => 'No categories found matching your criteria'], Response::HTTP_NOT_FOUND);
+    }
+
     return $this->json($categories, Response::HTTP_OK);
   }
-
   /**
    * Отримати  id
    * @param string $id

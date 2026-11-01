@@ -2,13 +2,14 @@
 
 namespace App\Entity;
 
+use App\Repository\OrderRepository;
 use Doctrine\ORM\Mapping as ORM;
 use JsonSerializable;
 
 /**
  * Сутність Замовлення
  */
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: OrderRepository::class)]
 #[ORM\Table(name: '`order`')]
 class Order implements JsonSerializable
 {

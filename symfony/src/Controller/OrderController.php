@@ -6,6 +6,7 @@ use App\Entity\Client;
 use App\Entity\Courier;
 use App\Entity\Order;
 use App\Entity\Product;
+use App\Repository\OrderRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -20,19 +21,46 @@ final class OrderController extends AbstractController
    */
   private EntityManagerInterface $entityManager;
 
-  public function __construct(EntityManagerInterface $entityManager)
+  /**
+   * @var OrderRepository
+   */
+  private OrderRepository $orderRepository;
+
+  public function __construct(EntityManagerInterface $entityManager, OrderRepository $orderRepository)
   {
     $this->entityManager = $entityManager;
+    $this->orderRepository = $orderRepository;
   }
 
   /**
-   * Отримати замовлення
+   * @param Request $request
    * @return JsonResponse
    */
   #[Route('/api/orders', name: 'app_get_orders', methods: ['GET'])]
-  public function getOrders(): JsonResponse
+  public function getOrders(Request $request): JsonResponse
   {
-    $orders = $this->entityManager->getRepository(Order::class)->findAll();
+    $allowedFields = [
+      'delivery_address',
+      'total_amount',
+      'status',
+      'client',
+      'client_id',
+      'courier',
+      'courier_id',
+      'product',
+      'product_id',
+    ];
+
+    try {
+      $orders = $this->orderRepository->filterAndPaginate($request, $allowedFields);
+    } catch (\InvalidArgumentException $e) {
+      return $this->json(['message' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
+    }
+
+    if (empty($orders)) {
+      return $this->json(['message' => 'No orders found matching your criteria'], Response::HTTP_NOT_FOUND);
+    }
+
     return $this->json($orders, Response::HTTP_OK);
   }
 

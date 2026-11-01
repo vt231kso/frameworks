@@ -13,8 +13,10 @@ class Client extends Model
      * Масив fillable
      * @var string[]
      */
+
     protected $fillable = ['name', 'phone', 'email'];
 
+    public const LIKE_FIELDS = ['name', 'phone', 'email'];
     /**
      * @return HasMany
      */

@@ -2,13 +2,14 @@
 
 namespace App\Entity;
 
+use App\Repository\CourierRepository;
 use Doctrine\ORM\Mapping as ORM;
 use JsonSerializable;
 
 /**
  * Сутність Курєр
  */
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: CourierRepository::class)]
 class Courier implements JsonSerializable
 {
   /**

@@ -12,14 +12,26 @@ use Symfony\Component\HttpFoundation\Response;
 class OrderController extends Controller
 {
     /**
-     * Отримати замовлення
+     * @param Request $request
      * @return JsonResponse
      */
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        $orders = Order::all();
+        $allowedFields = [
+            'id',
+            'delivery_address',
+            'total_amount',
+            'status',
+            'client_id',
+            'courier_id',
+            'product_id',
+        ];
 
-        return response()->json($orders, Response::HTTP_OK);
+        try {
+            return $this->filterAndPaginate(Order::query(), $request, $allowedFields);
+        } catch (\InvalidArgumentException $e) {
+            return response()->json(['message' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
+        }
     }
 
     /**

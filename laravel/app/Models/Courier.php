@@ -15,6 +15,8 @@ class Courier extends Model
      */
     protected $fillable = ['name', 'phone', 'vehicle_type'];
 
+    public const LIKE_FIELDS = ['name', 'phone', 'vehicle_type'];
+
     /**
      * @return HasMany
      */

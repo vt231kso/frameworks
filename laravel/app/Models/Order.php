@@ -15,6 +15,8 @@ class Order extends Model
      */
     protected $fillable = ['client_id', 'courier_id', 'product_id', 'delivery_address', 'total_amount', 'status'];
 
+
+    public const LIKE_FIELDS = ['delivery_address'];
     /**
      * @return BelongsTo
      */

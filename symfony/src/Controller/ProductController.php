@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Category;
 use App\Entity\Product;
+use App\Repository\ProductRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -18,22 +19,38 @@ final class ProductController extends AbstractController
    */
   private EntityManagerInterface $entityManager;
 
-  public function __construct(EntityManagerInterface $entityManager)
+  /**
+   * @var ProductRepository
+   */
+  private ProductRepository $productRepository;
+
+  public function __construct(EntityManagerInterface $entityManager, ProductRepository $productRepository)
   {
     $this->entityManager = $entityManager;
+    $this->productRepository = $productRepository;
   }
 
   /**
-   * Отримати продукти
+   * @param Request $request
    * @return JsonResponse
    */
   #[Route('/api/products', name: 'app_get_products', methods: ['GET'])]
-  public function getProducts(): JsonResponse
+  public function getProducts(Request $request): JsonResponse
   {
-    $products = $this->entityManager->getRepository(Product::class)->findAll();
+    $allowedFields = ['name', 'price', 'category', 'category_id'];
+
+    try {
+      $products = $this->productRepository->filterAndPaginate($request, $allowedFields);
+    } catch (\InvalidArgumentException $e) {
+      return $this->json(['message' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
+    }
+
+    if (empty($products)) {
+      return $this->json(['message' => 'No products found matching your criteria'], Response::HTTP_NOT_FOUND);
+    }
+
     return $this->json($products, Response::HTTP_OK);
   }
-
   /**
    * Отримати за id
    * @param string $id

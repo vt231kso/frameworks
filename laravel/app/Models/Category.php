@@ -14,6 +14,7 @@ class Category extends Model
      * Масив fillable
      * @var string[]
      */
+    public const LIKE_FIELDS = ['name', 'description'];
     protected $fillable = ['name', 'description'];
 
     /**

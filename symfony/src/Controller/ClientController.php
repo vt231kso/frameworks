@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Client;
+use App\Repository\ClientRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -16,23 +17,38 @@ final class ClientController extends AbstractController
    * @var EntityManagerInterface
    */
   private EntityManagerInterface $entityManager;
+  /**
+   * @var ClientRepository
+   */
+  private ClientRepository $clientRepository;
 
-  public function __construct(EntityManagerInterface $entityManager)
+  public function __construct(EntityManagerInterface $entityManager, ClientRepository $clientRepository)
   {
     $this->entityManager = $entityManager;
+    $this->clientRepository = $clientRepository;
   }
 
   /**
-   * Отримати клієнтів
+   * @param Request $request
    * @return JsonResponse
    */
   #[Route('/api/clients', name: 'app_get_clients', methods: ['GET'])]
-  public function getClients(): JsonResponse
+  public function getClients(Request $request): JsonResponse
   {
-    $clients = $this->entityManager->getRepository(Client::class)->findAll();
+    $allowedParams = ['name', 'phone', 'email'];
+
+    try {
+      $clients = $this->clientRepository->filterAndPaginate($request, $allowedParams);
+    } catch (\InvalidArgumentException $e) {
+      return $this->json(['message' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
+    }
+
+    if (empty($clients)) {
+      return $this->json(['message' => 'No clients found matching your criteria'], Response::HTTP_NOT_FOUND);
+    }
+
     return $this->json($clients, Response::HTTP_OK);
   }
-
   /**
    * Отримати за id
    * @param string $id

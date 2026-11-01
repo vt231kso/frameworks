@@ -6,20 +6,24 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Symfony\Component\HttpFoundation\JsonResponse;
+use Illuminate\Http\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 
 class CategoryController extends Controller
 {
     /**
-     * Отримати категорії
+     * @param Request $request
      * @return JsonResponse
      */
-    public function index(): JsonResponse
+    public function index( Request $request): JsonResponse
     {
-        $categories = Category::all();
+        $allowedFields = ['id', 'name', 'description'];
 
-        return response()->json($categories, Response::HTTP_OK);
+        try {
+            return $this->filterAndPaginate(Category::query(), $request, $allowedFields);
+        } catch (\InvalidArgumentException $e) {
+            return response()->json(['message' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
+        }
     }
 
     /**

@@ -2,13 +2,14 @@
 
 namespace App\Entity;
 
+use App\Repository\ProductRepository;
 use Doctrine\ORM\Mapping as ORM;
 use JsonSerializable;
 
 /**
  * Сутність Продукту
  */
-#[ORM\Entity]
+#[ORM\Entity(repositoryClass: ProductRepository::class)]
 class Product implements JsonSerializable
 {
   /**

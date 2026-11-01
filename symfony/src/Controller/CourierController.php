@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Courier;
+use App\Repository\CourierRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -17,22 +18,38 @@ final class CourierController extends AbstractController
    */
   private EntityManagerInterface $entityManager;
 
-  public function __construct(EntityManagerInterface $entityManager)
+  /**
+   * @var CourierRepository
+   */
+  private CourierRepository $courierRepository;
+
+  public function __construct(EntityManagerInterface $entityManager, CourierRepository $courierRepository )
   {
     $this->entityManager = $entityManager;
+    $this->courierRepository = $courierRepository;
   }
 
   /**
-   * Отримати курєра
+   * @param Request $request
    * @return JsonResponse
    */
   #[Route('/api/couriers', name: 'app_get_couriers', methods: ['GET'])]
-  public function getCouriers(): JsonResponse
+  public function getCouriers(Request $request): JsonResponse
   {
-    $couriers = $this->entityManager->getRepository(Courier::class)->findAll();
+    $allowedParams = ['name', 'phone', 'vehicle_type'];
+
+    try {
+      $couriers = $this->courierRepository->filterAndPaginate($request, $allowedParams);
+    } catch (\InvalidArgumentException $e) {
+      return $this->json(['message' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
+    }
+
+    if (empty($couriers)) {
+      return $this->json(['message' => 'No couriers found matching your criteria'], Response::HTTP_NOT_FOUND);
+    }
+
     return $this->json($couriers, Response::HTTP_OK);
   }
-
   /**
    * Отримати за id
    * @param string $id

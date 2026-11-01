@@ -12,14 +12,18 @@ use Symfony\Component\HttpFoundation\Response;
 class ClientController extends Controller
 {
     /**
-     * Отримати клінєтів
+     * @param Request $request
      * @return JsonResponse
      */
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        $clients = Client::all();
+        $allowedFields = ['id', 'name', 'phone', 'email'];
 
-        return response()->json($clients, Response::HTTP_OK);
+        try {
+            return $this->filterAndPaginate(Client::query(), $request, $allowedFields);
+        } catch (\InvalidArgumentException $e) {
+            return response()->json(['message' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
+        }
     }
 
     /**

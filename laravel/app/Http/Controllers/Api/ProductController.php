@@ -12,14 +12,18 @@ use Symfony\Component\HttpFoundation\Response;
 class ProductController extends Controller
 {
     /**
-     * Отримати продукти
+     * @param Request $request
      * @return JsonResponse
      */
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        $products = Product::all();
+        $allowedFields = ['id', 'name', 'price', 'category_id'];
 
-        return response()->json($products, Response::HTTP_OK);
+        try {
+            return $this->filterAndPaginate(Product::query(), $request, $allowedFields);
+        } catch (\InvalidArgumentException $e) {
+            return response()->json(['message' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
+        }
     }
 
     /**

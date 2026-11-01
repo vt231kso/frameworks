@@ -13,6 +13,7 @@ class Product extends Model
      * Масив fillable
      * @var string[]
      */
+    public const LIKE_FIELDS = ['name'];
     protected $fillable = ['category_id', 'name', 'price'];
 
     /**
