@@ -25,7 +25,6 @@ abstract class BaseRepository extends ServiceEntityRepository
       $likeFields = static::LIKE_FIELDS;
     }
 
-
     $allQueryParams = array_keys($request->query->all());
     $systemParams = ['page', 'itemsPerPage'];
 
@@ -42,69 +41,48 @@ abstract class BaseRepository extends ServiceEntityRepository
     }
 
     $qb = $this->createQueryBuilder('e');
-    $joinedAssociations = [];
-    $metadata = $this->getClassMetadata();
 
     foreach ($allowedFields as $field) {
-      if (in_array($field, ['page', 'itemsPerPage'], true)) {
+      if (in_array($field, $systemParams, true)) {
         continue;
       }
 
-      $queryKey = $field;
       $propertyName = $field;
 
+      // category_id -> category (назва властивості в сутності)
       if (str_ends_with($field, '_id')) {
         $propertyName = substr($field, 0, -3);
       }
 
-      $camelProperty = $this->snakeToCamel($propertyName);
+      // delivery_address -> deliveryAddress
+      $targetField = $this->snakeToCamel($propertyName);
 
-      $val = $request->query->get($queryKey);
-      $fromVal = $request->query->get($queryKey . '_from');
-      $toVal = $request->query->get($queryKey . '_to');
+      $val = $request->query->get($field);
+      $fromVal = $request->query->get($field . '_from');
+      $toVal = $request->query->get($field . '_to');
 
       if (($val === null || $val === '') && ($fromVal === null || $fromVal === '') && ($toVal === null || $toVal === '')) {
         continue;
       }
 
-      $targetAlias = 'e';
-      $targetField = $camelProperty;
-
-
-      if ($metadata->hasAssociation($camelProperty)) {
-        if (!isset($joinedAssociations[$camelProperty])) {
-          $joinAlias = $camelProperty . '_join';
-          $qb->leftJoin("e.{$camelProperty}", $joinAlias);
-          $joinedAssociations[$camelProperty] = $joinAlias;
-        }
-        $targetAlias = $joinedAssociations[$camelProperty];
-        $targetField = 'id';
-      }
-
-
       if ($val !== null && $val !== '') {
-        $paramName = str_replace('.', '_', $field);
-
         if (in_array($field, $likeFields, true)) {
-          $qb->andWhere("{$targetAlias}.{$targetField} LIKE :{$paramName}")
-            ->setParameter($paramName, '%' . $val . '%');
+          $qb->andWhere("e.{$targetField} LIKE :{$field}")
+            ->setParameter($field, '%' . $val . '%');
         } else {
-          $qb->andWhere("{$targetAlias}.{$targetField} = :{$paramName}")
-            ->setParameter($paramName, $val);
+          $qb->andWhere("e.{$targetField} = :{$field}")
+            ->setParameter($field, $val);
         }
       }
 
       if ($fromVal !== null && $fromVal !== '') {
-        $paramFrom = str_replace('.', '_', $field) . '_from';
-        $qb->andWhere("{$targetAlias}.{$targetField} >= :{$paramFrom}")
-          ->setParameter($paramFrom, $fromVal);
+        $qb->andWhere("e.{$targetField} >= :{$field}_from")
+          ->setParameter($field . '_from', $fromVal);
       }
 
-
       if ($toVal !== null && $toVal !== '') {
-        $paramTo = str_replace('.', '_', $field) . '_to';
-        $qb->andWhere("{$targetAlias}.{$targetField} <= :{$paramTo}")
-          ->setParameter($paramTo, $toVal);
+        $qb->andWhere("e.{$targetField} <= :{$field}_to")
+          ->setParameter($field . '_to', $toVal);
       }
     }
 

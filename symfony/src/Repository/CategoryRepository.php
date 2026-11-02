@@ -10,6 +10,8 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class CategoryRepository  extends BaseRepository
 {
+
+  public const LIKE_FIELDS = ['name', 'description'];
   public function __construct(ManagerRegistry $registry)
   {
     parent::__construct($registry, Category::class);
