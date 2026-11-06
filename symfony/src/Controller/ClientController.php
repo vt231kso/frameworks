@@ -10,6 +10,8 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 final class ClientController extends AbstractController
 {
@@ -27,12 +29,36 @@ final class ClientController extends AbstractController
     $this->entityManager = $entityManager;
     $this->clientRepository = $clientRepository;
   }
+  /**
+   * Отримати профіль поточного авторизованого клієнта
+   */
+  #[Route('/api/clients/me', name: 'app_get_current_client', methods: ['GET'])]
+  #[IsGranted('ROLE_CLIENT')]
+  public function getCurrentClient(): JsonResponse
+  {
+    /** @var UserInterface $currentUser */
+    $currentUser = $this->getUser();
+    $userEmail = method_exists($currentUser, 'getEmail')
+      ? $currentUser->getEmail()
+      : $currentUser->getUserIdentifier();
+
+    /** @var Client|null $client */
+    $client = $this->clientRepository->findOneBy(['email' => $userEmail]);
+
+    if (empty($client)) {
+      return $this->json(['message' => 'Client profile not found for current user'], Response::HTTP_NOT_FOUND);
+    }
+
+    return $this->json($client, Response::HTTP_OK);
+  }
+
 
   /**
    * @param Request $request
    * @return JsonResponse
    */
   #[Route('/api/clients', name: 'app_get_clients', methods: ['GET'])]
+  #[IsGranted('ROLE_MANAGER')]
   public function getClients(Request $request): JsonResponse
   {
     $allowedParams = ['name', 'phone', 'email'];
@@ -55,6 +81,7 @@ final class ClientController extends AbstractController
    * @return JsonResponse
    */
   #[Route('/api/clients/{id}', name: 'app_get_client_by_id', methods: ['GET'])]
+  #[IsGranted('ROLE_MANAGER')]
   public function getClientById(string $id): JsonResponse
   {
     /** @var Client|null $client */
@@ -73,6 +100,7 @@ final class ClientController extends AbstractController
    * @return JsonResponse
    */
   #[Route('/api/clients', name: 'app_create_client', methods: ['POST'])]
+  #[IsGranted('ROLE_MANAGER')]
   public function createClient(Request $request): JsonResponse
   {
     $data = json_decode($request->getContent(), true);
@@ -96,6 +124,7 @@ final class ClientController extends AbstractController
    * @return JsonResponse
    */
   #[Route('/api/clients/{id}', name: 'app_update_client', methods: ['PATCH', 'PUT'])]
+  #[IsGranted('ROLE_MANAGER')]
   public function updateClient(string $id, Request $request): JsonResponse
   {
     /** @var Client|null $client */
@@ -128,6 +157,7 @@ final class ClientController extends AbstractController
    * @return JsonResponse
    */
   #[Route('/api/clients/{id}', name: 'app_delete_client', methods: ['DELETE'])]
+  #[IsGranted('ROLE_ADMIN')]
   public function deleteClient(string $id): JsonResponse
   {
     /** @var Client|null $client */

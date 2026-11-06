@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 final class CategoryController extends AbstractController
 {
@@ -33,6 +34,7 @@ final class CategoryController extends AbstractController
    * @return JsonResponse
    */
   #[Route('/api/categories', name: 'app_get_categories', methods: ['GET'])]
+  #[IsGranted('ROLE_CLIENT')]
   public function getCategories(Request $request): JsonResponse
   {
     $allowedParams = ['name', 'description'];
@@ -55,6 +57,7 @@ final class CategoryController extends AbstractController
    * @return JsonResponse
    */
   #[Route('/api/categories/{id}', name: 'app_get_category_by_id', methods: ['GET'])]
+  #[IsGranted('ROLE_CLIENT')]
   public function getCategoryById(string $id): JsonResponse
   {
     /** @var Category|null $category */
@@ -73,6 +76,7 @@ final class CategoryController extends AbstractController
    * @return JsonResponse
    */
   #[Route('/api/categories', name: 'app_create_category', methods: ['POST'])]
+  #[IsGranted('ROLE_MANAGER')]
   public function createCategory(Request $request): JsonResponse
   {
     $data = json_decode($request->getContent(), true);
@@ -98,6 +102,7 @@ final class CategoryController extends AbstractController
    * @return JsonResponse
    */
   #[Route('/api/categories/{id}', name: 'app_update_category', methods: ['PATCH', 'PUT'])]
+  #[IsGranted('ROLE_MANAGER')]
   public function updateCategory(string $id, Request $request): JsonResponse
   {
     /** @var Category|null $category */
@@ -127,6 +132,7 @@ final class CategoryController extends AbstractController
    * @return JsonResponse
    */
   #[Route('/api/categories/{id}', name: 'app_delete_category', methods: ['DELETE'])]
+  #[IsGranted('ROLE_ADMIN')]
   public function deleteCategory(string $id): JsonResponse
   {
     /** @var Category|null $category */

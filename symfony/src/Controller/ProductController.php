@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 final class ProductController extends AbstractController
 {
   /**
@@ -35,6 +35,7 @@ final class ProductController extends AbstractController
    * @return JsonResponse
    */
   #[Route('/api/products', name: 'app_get_products', methods: ['GET'])]
+  #[IsGranted('ROLE_CLIENT')]
   public function getProducts(Request $request): JsonResponse
   {
     $allowedFields = ['name', 'price', 'category', 'category_id'];
@@ -57,6 +58,7 @@ final class ProductController extends AbstractController
    * @return JsonResponse
    */
   #[Route('/api/products/{id}', name: 'app_get_product_by_id', methods: ['GET'])]
+  #[IsGranted('ROLE_CLIENT')]
   public function getProductById(string $id): JsonResponse
   {
     /** @var Product|null $product */
@@ -75,6 +77,7 @@ final class ProductController extends AbstractController
    * @return JsonResponse
    */
   #[Route('/api/products', name: 'app_create_product', methods: ['POST'])]
+  #[IsGranted('ROLE_MANAGER')]
   public function createProduct(Request $request): JsonResponse
   {
     $data = json_decode($request->getContent(), true);
@@ -104,6 +107,7 @@ final class ProductController extends AbstractController
    * @return JsonResponse
    */
   #[Route('/api/products/{id}', name: 'app_update_product', methods: ['PATCH', 'PUT'])]
+  #[IsGranted('ROLE_MANAGER')]
   public function updateProduct(string $id, Request $request): JsonResponse
   {
     /** @var Product|null $product */
@@ -139,6 +143,7 @@ final class ProductController extends AbstractController
    * @return JsonResponse
    */
   #[Route('/api/products/{id}', name: 'app_delete_product', methods: ['DELETE'])]
+  #[IsGranted('ROLE_ADMIN')]
   public function deleteProduct(string $id): JsonResponse
   {
     /** @var Product|null $product */

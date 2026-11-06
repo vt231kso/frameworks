@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 final class CourierController extends AbstractController
 {
@@ -34,6 +35,7 @@ final class CourierController extends AbstractController
    * @return JsonResponse
    */
   #[Route('/api/couriers', name: 'app_get_couriers', methods: ['GET'])]
+  #[IsGranted('ROLE_MANAGER')]
   public function getCouriers(Request $request): JsonResponse
   {
     $allowedParams = ['name', 'phone', 'vehicle_type'];
@@ -56,6 +58,7 @@ final class CourierController extends AbstractController
    * @return JsonResponse
    */
   #[Route('/api/couriers/{id}', name: 'app_get_courier_by_id', methods: ['GET'])]
+  #[IsGranted('ROLE_MANAGER')]
   public function getCourierById(string $id): JsonResponse
   {
     /** @var Courier|null $courier */
@@ -74,6 +77,7 @@ final class CourierController extends AbstractController
    * @return JsonResponse
    */
   #[Route('/api/couriers', name: 'app_create_courier', methods: ['POST'])]
+  #[IsGranted('ROLE_MANAGER')]
   public function createCourier(Request $request): JsonResponse
   {
     $data = json_decode($request->getContent(), true);
@@ -97,6 +101,7 @@ final class CourierController extends AbstractController
    * @return JsonResponse
    */
   #[Route('/api/couriers/{id}', name: 'app_update_courier', methods: ['PATCH', 'PUT'])]
+  #[IsGranted('ROLE_MANAGER')]
   public function updateCourier(string $id, Request $request): JsonResponse
   {
     /** @var Courier|null $courier */
@@ -129,6 +134,7 @@ final class CourierController extends AbstractController
    * @return JsonResponse
    */
   #[Route('/api/couriers/{id}', name: 'app_delete_courier', methods: ['DELETE'])]
+  #[IsGranted('ROLE_ADMIN')]
   public function deleteCourier(string $id): JsonResponse
   {
     /** @var Courier|null $courier */

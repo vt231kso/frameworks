@@ -13,6 +13,8 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 final class OrderController extends AbstractController
 {
@@ -37,6 +39,7 @@ final class OrderController extends AbstractController
    * @return JsonResponse
    */
   #[Route('/api/orders', name: 'app_get_orders', methods: ['GET'])]
+  #[IsGranted('ROLE_MANAGER')]
   public function getOrders(Request $request): JsonResponse
   {
     $allowedFields = [
@@ -65,11 +68,13 @@ final class OrderController extends AbstractController
   }
 
   /**
-   * Отримати за id
+   * Отримати замовлення за id
+   *
    * @param string $id
    * @return JsonResponse
    */
   #[Route('/api/orders/{id}', name: 'app_get_order_by_id', methods: ['GET'])]
+  #[IsGranted('ROLE_CLIENT')]
   public function getOrderById(string $id): JsonResponse
   {
     /** @var Order|null $order */
@@ -79,15 +84,38 @@ final class OrderController extends AbstractController
       return $this->json(['message' => 'Order not found'], Response::HTTP_NOT_FOUND);
     }
 
+
+    if ($this->isGranted('ROLE_MANAGER') || $this->isGranted('ROLE_ADMIN')) {
+      return $this->json($order, Response::HTTP_OK);
+    }
+
+    /** @var UserInterface $currentUser */
+    $currentUser = $this->getUser();
+
+    $userEmail = method_exists($currentUser, 'getEmail')
+      ? $currentUser->getEmail()
+      : $currentUser->getUserIdentifier();
+
+    $currentClientProfile = $this->entityManager->getRepository(Client::class)->findOneBy([
+      'email' => $userEmail
+    ]);
+
+    $orderClient = $order->getClient();
+
+
+    if (!$currentClientProfile || !$orderClient || $orderClient->getId() !== $currentClientProfile->getId()) {
+      return $this->json(['message' => 'Access denied. You can only view your own orders.'], Response::HTTP_FORBIDDEN);
+    }
+
     return $this->json($order, Response::HTTP_OK);
   }
-
   /**
    * Створити замовлення
    * @param Request $request
    * @return JsonResponse
    */
   #[Route('/api/orders', name: 'app_create_order', methods: ['POST'])]
+  #[IsGranted('ROLE_MANAGER')]
   public function createOrder(Request $request): JsonResponse
   {
     $data = json_decode($request->getContent(), true);
@@ -124,6 +152,7 @@ final class OrderController extends AbstractController
    * @return JsonResponse
    */
   #[Route('/api/orders/{id}', name: 'app_update_order', methods: ['PATCH', 'PUT'])]
+  #[IsGranted('ROLE_MANAGER')]
   public function updateOrder(string $id, Request $request): JsonResponse
   {
     /** @var Order|null $order */
@@ -172,6 +201,7 @@ final class OrderController extends AbstractController
    * @return JsonResponse
    */
   #[Route('/api/orders/{id}', name: 'app_delete_order', methods: ['DELETE'])]
+  #[IsGranted('ROLE_ADMIN')]
   public function deleteOrder(string $id): JsonResponse
   {
     /** @var Order|null $order */
