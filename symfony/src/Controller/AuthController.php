@@ -14,6 +14,13 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class AuthController extends AbstractController
 {
+  /**
+   * @param Request $request
+   * @param UserPasswordHasherInterface $hasher
+   * @param ValidatorInterface $validator
+   * @param EntityManagerInterface $em
+   * @return JsonResponse
+   */
   #[Route('/api/register', name: 'api_register', methods: ['POST'])]
   public function register(
     Request $request,
@@ -50,6 +57,9 @@ class AuthController extends AbstractController
     ], Response::HTTP_CREATED);
   }
 
+  /**
+   * @return JsonResponse
+   */
   #[Route('/api/me', name: 'api_me', methods: ['GET'])]
   public function me(): JsonResponse
   {

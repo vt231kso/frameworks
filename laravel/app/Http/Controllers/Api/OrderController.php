@@ -35,21 +35,11 @@ class OrderController extends Controller
     }
 
     /**
-     * Отримати за id
-     * @param string $id
+     * @param Order $order
      * @return JsonResponse
      */
-    public function show(string $id): JsonResponse
+    public function show(Order $order): JsonResponse
     {
-        $order = Order::find($id);
-
-        if (empty($order)) {
-            return response()->json(
-                ['message' => 'Order not found'],
-                Response::HTTP_NOT_FOUND
-            );
-        }
-
         return response()->json($order, Response::HTTP_OK);
     }
 
