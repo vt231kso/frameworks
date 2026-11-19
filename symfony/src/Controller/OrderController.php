@@ -7,6 +7,7 @@ use App\Entity\Courier;
 use App\Entity\Order;
 use App\Entity\Product;
 use App\Repository\OrderRepository;
+use App\Security\Voter\OrderVoter;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -80,32 +81,12 @@ final class OrderController extends AbstractController
     /** @var Order|null $order */
     $order = $this->entityManager->getRepository(Order::class)->findOneBy(['id' => $id]);
 
-    if (empty($order)) {
+    if (!$order) {
       return $this->json(['message' => 'Order not found'], Response::HTTP_NOT_FOUND);
     }
 
-
-    if ($this->isGranted('ROLE_MANAGER') || $this->isGranted('ROLE_ADMIN')) {
-      return $this->json($order, Response::HTTP_OK);
-    }
-
-    /** @var UserInterface $currentUser */
-    $currentUser = $this->getUser();
-
-    $userEmail = method_exists($currentUser, 'getEmail')
-      ? $currentUser->getEmail()
-      : $currentUser->getUserIdentifier();
-
-    $currentClientProfile = $this->entityManager->getRepository(Client::class)->findOneBy([
-      'email' => $userEmail
-    ]);
-
-    $orderClient = $order->getClient();
-
-
-    if (!$currentClientProfile || !$orderClient || $orderClient->getId() !== $currentClientProfile->getId()) {
-      return $this->json(['message' => 'Access denied. You can only view your own orders.'], Response::HTTP_FORBIDDEN);
-    }
+    // Викликає OrderVoter::voteOnAttribute() -> поверне 403, якщо замовлення чуже
+    $this->denyAccessUnlessGranted(OrderVoter::VIEW, $order);
 
     return $this->json($order, Response::HTTP_OK);
   }
